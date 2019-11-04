@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Specify proxy host, port number, and ECS cluster name to use
 
-echo "ECS_CLUSTER=${ECS_CLUSTER}" > /etc/ecs/ecs.config
+# Specify proxy host, port number, and ECS cluster name to use
+PROXY_HOST=proxy.velvetropes.org
+PROXY_PORT=3128
 
 
 if grep -q 'Amazon Linux release 2' /etc/system-release ; then
@@ -15,21 +17,20 @@ else
 fi
 
 # Set Yum HTTP proxy
-if [ -n $PROXY_URL  ];
-then
-    echo "proxy=$PROXY_URL" >> /etc/yum.conf
+if [ ! -f /var/lib/cloud/instance/sem/config_yum_http_proxy ]; then
+    echo "proxy=http://$PROXY_HOST:$PROXY_PORT" >> /etc/yum.conf
     echo "$$: $(date +%s.%N | cut -b1-13)" > /var/lib/cloud/instance/sem/config_yum_http_proxy
 fi
 
 # Set Docker HTTP proxy (different methods for Amazon Linux 2 and Amazon Linux AMI)
 # Amazon Linux 2
-if [ $OS == "AL2" ] && [ -n $PROXY_URL  ]; then
+if [ $OS == "AL2" ] && [ ! -f /var/lib/cloud/instance/sem/config_docker_http_proxy ]; then
     mkdir /etc/systemd/system/docker.service.d
     cat <<EOF > /etc/systemd/system/docker.service.d/http-proxy.conf
 [Service]
-Environment="HTTP_PROXY=$PROXY_URL"
-Environment="HTTPS_PROXY=$PROXY_URL"
-Environment="NO_PROXY=169.254.169.254,169.254.170.2,email-smtp.us-west-2.amazonaws.com"
+Environment="HTTP_PROXY=http://$PROXY_HOST:$PROXY_PORT/"
+Environment="HTTPS_PROXY=http://$PROXY_HOST:$PROXY_PORT/"
+Environment="NO_PROXY=169.254.169.254,169.254.170.2"
 EOF
     systemctl daemon-reload
     if [ "$(systemctl is-active docker)" == "active" ]
@@ -39,41 +40,39 @@ EOF
     echo "$$: $(date +%s.%N | cut -b1-13)" > /var/lib/cloud/instance/sem/config_docker_http_proxy
 fi
 # Amazon Linux AMI
-if [ $OS == "ALAMI" ] && [ -n $PROXY_URL  ];
+if [ $OS == "ALAMI" ] && [ ! -f /var/lib/cloud/instance/sem/config_docker_http_proxy ];
 then
-    echo "export HTTP_PROXY=$PROXY_URL" >> /etc/sysconfig/docker
-    echo "export HTTPS_PROXY=$PROXY_URL" >> /etc/sysconfig/docker
-    echo "export NO_PROXY=169.254.169.254,169.254.170.2,email-smtp.us-west-2.amazonaws.com" >> /etc/sysconfig/docker
+    echo "export HTTP_PROXY=http://$PROXY_HOST:$PROXY_PORT/" >> /etc/sysconfig/docker
+    echo "export HTTPS_PROXY=http://$PROXY_HOST:$PROXY_PORT/" >> /etc/sysconfig/docker
+    echo "export NO_PROXY=169.254.169.254,169.254.170.2" >> /etc/sysconfig/docker
     echo "$$: $(date +%s.%N | cut -b1-13)" > /var/lib/cloud/instance/sem/config_docker_http_proxy
 fi
 
 # Set ECS agent HTTP proxy
-if [ -n $PROXY_URL ];
+if [ ! -f /var/lib/cloud/instance/sem/config_ecs-agent_http_proxy ];
 then
     cat <<EOF > /etc/ecs/ecs.config
-ECS_CLUSTER=$ECS_CLUSTER
+ECS_CLUSTER=$CLUSTER_NAME
 ECS_LOGLEVEL=debug
-HTTP_PROXY=$PROXY_URL
-HTTPS_PROXY=$PROXY_URL
-NO_PROXY=169.254.169.254,169.254.170.2,/var/run/docker.sock,email-smtp.us-west-2.amazonaws.com
+HTTP_PROXY=$PROXY_HOST:$PROXY_PORT
+NO_PROXY=169.254.169.254,169.254.170.2,/var/run/docker.sock
 EOF
     echo "$$: $(date +%s.%N | cut -b1-13)" > /var/lib/cloud/instance/sem/config_ecs-agent_http_proxy
 else
     cat >> /etc/ecs/ecs.config <<EOF
-ECS_CLUSTER=$ECS_CLUSTER
+ECS_CLUSTER=$CLUSTER_NAME
 ECS_LOGLEVEL=debug
 EOF
 fi
 
 # Set ecs-init HTTP proxy (different methods for Amazon Linux 2 and Amazon Linux AMI)
 # Amazon Linux 2
-if [ $OS == "AL2" ] && [ -n $PROXY_URL  ]; then
+if [ $OS == "AL2" ] && [ ! -f /var/lib/cloud/instance/sem/config_ecs-init_http_proxy ]; then
     mkdir /etc/systemd/system/ecs.service.d
     cat <<EOF > /etc/systemd/system/ecs.service.d/http-proxy.conf
 [Service]
 Environment="HTTP_PROXY=$PROXY_HOST:$PROXY_PORT/"
-Environment="HTTPS_PROXY=$PROXY_HOST:$PROXY_PORT/"
-Environment="NO_PROXY=169.254.169.254,169.254.170.2,/var/run/docker.sock,email-smtp.us-west-2.amazonaws.com"
+Environment="NO_PROXY=169.254.169.254,169.254.170.2,/var/run/docker.sock"
 EOF
     systemctl daemon-reload
     if [ "$(systemctl is-active ecs)" == "active" ]; then
@@ -82,11 +81,10 @@ EOF
     echo "$$: $(date +%s.%N | cut -b1-13)" > /var/lib/cloud/instance/sem/config_ecs-init_http_proxy
 fi
 # Amazon Linux AMI
-if [ $OS == "ALAMI" ] && [ -n $PROXY_URL ]; then
+if [ $OS == "ALAMI" ] && [ ! -f /var/lib/cloud/instance/sem/config_ecs-init_http_proxy ]; then
     cat <<EOF > /etc/init/ecs.override
-env HTTP_PROXY=$PROXY_URL
-env HTTPS_PROXY=$PROXY_URL
-env NO_PROXY=169.254.169.254,169.254.170.2,/var/run/docker.sock,email-smtp.us-west-2.amazonaws.com
+env HTTP_PROXY=$PROXY_HOST:$PROXY_PORT
+env NO_PROXY=169.254.169.254,169.254.170.2,/var/run/docker.sock
 EOF
     echo "$$: $(date +%s.%N | cut -b1-13)" > /var/lib/cloud/instance/sem/config_ecs-init_http_proxy
 fi

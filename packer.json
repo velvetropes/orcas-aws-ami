@@ -12,16 +12,16 @@
       "secret_key": "{{user `aws_secret_access_key`}}",
       "token": "{{user `aws_session_token`}}",
       "region": "us-west-2",
-      "source_ami": "ami-077368b501184adb9",
-      "instance_type": "t2.micro",
+      "source_ami": "ami-0099b5a47043cfe0a",
+      "instance_type": "t3.micro",
       "ssh_username": "ec2-user",
       "associate_public_ip_address": "true",
       "ami_name": "orcas-aws-ecs-base {{timestamp}}",
       "tags": {
-        "Name": "2019-08 OrcasCars.com Base Cluster Image",
-        "SourceAMI": "ami-077368b501184adb9",
+        "Name": "2019-11 OrcasCars.com Base Cluster Image",
+        "SourceAMI": "ami-0099b5a47043cfe0a",
         "DockerVersion": "18.06.1-ce",
-        "ECSAgentVersion": "1.29.0"
+        "ECSAgentVersion": "1.32.1"
       }
     }
   ],

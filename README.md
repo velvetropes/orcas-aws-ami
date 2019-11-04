@@ -2,8 +2,10 @@
 
 This repository provides a Packer build script for creating Amazon Machine Images (AMIs) for running custom AWS EC2 Container Service (ECS) Container Instance images, as described in the Pluralsight course Docker in Production using AWS.
 
+Based one: https://github.com/docker-production-aws/packer-ecs
+
 ## Current AIM
-ami-0dbe036377e7192d3
+us-west-2:ami-0ffde38b6454aee1e
 
 ### Get latest AMI
 https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-optimized_AMI.html
@@ -15,7 +17,7 @@ g CloudWatch logs](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/us
 ### Login
 ```bash
 export AWS_PROFILE=orcas
-aws sts assume-role --role-arn  --role-session-name oc.next
+eval $( aws ecr get-login --no-include-email --region us-west-2 )
 
 ```
 ```bash
