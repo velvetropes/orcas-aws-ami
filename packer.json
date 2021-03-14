@@ -12,42 +12,42 @@
       "secret_key": "{{user `aws_secret_access_key`}}",
       "token": "{{user `aws_session_token`}}",
       "region": "us-west-2",
-      "source_ami": "ami-0fb71e703258ab7eb",
-      "instance_type": "t3.micro",
+      "source_ami": "ami-01e1d12a048e67ed2",
+      "instance_type": "t2.micro",
       "ssh_username": "ec2-user",
       "associate_public_ip_address": "true",
       "ami_name": "orcas-aws-ecs-base {{timestamp}}",
       "tags": {
-        "Name": "2019-11 OrcasCars.com Base Cluster Image",
-        "SourceAMI": "ami-0fb71e703258ab7eb",
-        "DockerVersion": "18.06.1-ce",
-        "ECSAgentVersion": "1.33.0"
+        "Name": "2020-08 OrcasCars.com Base Cluster Image",
+        "SourceAMI": "ami-07fc7997fccfff302",
+        "DockerVersion": "19.03.13-ce",
+        "ECSAgentVersion": "1.48.1"
       }
     }
   ],
   "provisioners": [
     {
       "type": "shell",
-      "script": "scripts-2/configure-timezone.sh",
+      "script": "scripts/configure-timezone.sh",
       "environment_vars": [
         "TIME_ZONE={{user `time_zone`}}"
       ]
     },
     {
       "type": "shell",
-      "script": "scripts-2/install-os-packages.sh"
+      "script": "scripts/install-os-packages.sh"
     },
     {
       "type": "shell",
-      "script": "scripts-2/cloud-init-options.sh"
+      "script": "scripts/cloud-init-options.sh"
     },
     {
       "type": "shell",
-      "script": "scripts-2/cleanup.sh"
+      "script": "scripts/cleanup.sh"
     },
     {
       "type": "file",
-      "source": "files-2/firstrun.sh",
+      "source": "files/firstrun.sh",
       "destination": "/home/ec2-user/firstrun.sh"
     }
   ],

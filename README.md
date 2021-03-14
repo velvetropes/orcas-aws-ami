@@ -4,10 +4,11 @@ This repository provides a Packer build script for creating Amazon Machine Image
 
 Based one: https://github.com/docker-production-aws/packer-ecs
 
-## Current AIM
-us-west-2:ami-0ffde38b6454aee1e
+## Current AIM2 - july 25, 2020
+us-west-2:ami-01e1d12a048e67ed2
 
-### Get latest AMI
+
+### Get latest AMI2
 https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-optimized_AMI.html
 g CloudWatch logs](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_cloudwatch_logs.html)
 
